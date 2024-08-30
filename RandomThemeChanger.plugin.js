@@ -34,7 +34,7 @@ module.exports = class RandomThemeChanger {
         this.interval = null;
         this.currentThemeId = null;
         this.enabledThemes = {};
-        this.showToast = true; // Default to showing toast
+        this.showToast = true;
     }
 
     start() {
@@ -83,7 +83,7 @@ module.exports = class RandomThemeChanger {
         panel.style.padding = "10px";
         panel.style.color = "white";
 
-        // Add CSS for styling
+       
         const style = document.createElement('style');
         style.textContent = `
             .rtp-settings-panel h3 {
@@ -106,7 +106,7 @@ module.exports = class RandomThemeChanger {
 
         panel.classList.add('rtp-settings-panel');
 
-        // Interval slider
+        
         const sliderContainer = document.createElement("div");
         sliderContainer.innerHTML = `
             <h3>Switch Interval (minutes)</h3>
@@ -125,7 +125,7 @@ module.exports = class RandomThemeChanger {
             this.startInterval();
         });
 
-        // Toast notification toggle
+        
         const toastToggle = document.createElement("div");
         toastToggle.classList.add('rtp-toast-toggle');
         toastToggle.innerHTML = `
@@ -143,7 +143,7 @@ module.exports = class RandomThemeChanger {
             this.saveSettings();
         });
 
-        // Theme toggles
+     
         const themesContainer = document.createElement("div");
         themesContainer.innerHTML = "<h3>Themes to Include</h3>";
         BdApi.Themes.getAll().forEach(theme => {
