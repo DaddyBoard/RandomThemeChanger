@@ -1,8 +1,8 @@
 /**
  * @name RandomThemeChanger
  * @author DaddyBoard
- * @version 1.2
- * @description Changes Discord themes randomly at a customizable interval, with theme selection options.
+ * @version 1.3
+ * @description Changes Discord themes randomly at a customizable interval, with theme selection options and optional notifications.
  * @website https://github.com/DaddyBoard/RandomThemeChanger
  * @source https://raw.githubusercontent.com/DaddyBoard/RandomThemeChanger/main/RandomThemeChanger.plugin.js
  */
@@ -11,8 +11,8 @@ const config = {
     info: {
         name: "RandomThemeChanger",
         authors: [{ name: "DaddyBoard" }],
-        version: "1.2",
-        description: "Changes Discord themes randomly at a customizable interval, with theme selection options."
+        version: "1.3",
+        description: "Changes Discord themes randomly at a customizable interval, with theme selection options and optional notifications."
     },
     defaultConfig: [
         {
@@ -34,6 +34,7 @@ module.exports = class RandomThemeChanger {
         this.interval = null;
         this.currentThemeId = null;
         this.enabledThemes = {};
+        this.showToast = true; // Default to showing toast
     }
 
     start() {
@@ -72,6 +73,9 @@ module.exports = class RandomThemeChanger {
         this.currentThemeId = newTheme.id;
 
         console.log(`Changed theme to: ${newTheme.name}`);
+        if (this.showToast) {
+            BdApi.showToast(`Changed theme to: ${newTheme.name}`);
+        }
     }
 
     getSettingsPanel() {
@@ -94,7 +98,7 @@ module.exports = class RandomThemeChanger {
             .rtp-settings-panel input[type="range"] {
                 width: 200px;
             }
-            .rtp-theme-toggle {
+            .rtp-theme-toggle, .rtp-toast-toggle {
                 margin-bottom: 5px;
             }
         `;
@@ -119,6 +123,24 @@ module.exports = class RandomThemeChanger {
             this.settings.switchInterval = value;
             this.saveSettings();
             this.startInterval();
+        });
+
+        // Toast notification toggle
+        const toastToggle = document.createElement("div");
+        toastToggle.classList.add('rtp-toast-toggle');
+        toastToggle.innerHTML = `
+            <h3>Notifications</h3>
+            <label>
+                <input type="checkbox" id="toastToggle" ${this.showToast ? 'checked' : ''}>
+                Show toast notification when theme changes
+            </label>
+        `;
+        panel.appendChild(toastToggle);
+
+        const toastCheckbox = toastToggle.querySelector("#toastToggle");
+        toastCheckbox.addEventListener("change", () => {
+            this.showToast = toastCheckbox.checked;
+            this.saveSettings();
         });
 
         // Theme toggles
@@ -154,10 +176,12 @@ module.exports = class RandomThemeChanger {
         this.settings = BdApi.Data.load(config.info.name, "settings") || {};
         if (!this.settings.switchInterval) this.settings.switchInterval = 60;
         this.enabledThemes = BdApi.Data.load(config.info.name, "enabledThemes") || {};
+        this.showToast = BdApi.Data.load(config.info.name, "showToast") ?? true; // Load toast setting, default to true
     }
 
     saveSettings() {
         BdApi.Data.save(config.info.name, "settings", this.settings);
         BdApi.Data.save(config.info.name, "enabledThemes", this.enabledThemes);
+        BdApi.Data.save(config.info.name, "showToast", this.showToast); // Save toast setting
     }
 }
