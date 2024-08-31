@@ -11,7 +11,7 @@ const config = {
     info: {
         name: "RandomThemeChanger",
         authors: [{ name: "DaddyBoard" }],
-        version: "1.3",
+        version: "1.4",
         description: "Changes Discord themes randomly at a customizable interval, with theme selection options and optional notifications."
     },
     defaultConfig: [
@@ -22,9 +22,9 @@ const config = {
             note: "How often to switch themes (in minutes)",
             value: 60,
             min: 1,
-            max: 1440,
-            markers: [1, 5, 15, 30, 60, 120, 240, 480, 720, 1440],
-            stickToMarkers: false
+            max: 360,
+            markers: [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 200, 205, 210, 215, 220, 225, 230, 235, 240, 245, 250, 255, 260, 265, 270, 275, 280, 285, 290, 295, 300, 305, 310, 315, 320, 325, 330, 335, 340, 345, 350, 355, 360],
+            stickToMarkers: true
         }
     ]
 };
@@ -83,7 +83,6 @@ module.exports = class RandomThemeChanger {
         panel.style.padding = "10px";
         panel.style.color = "white";
 
-       
         const style = document.createElement('style');
         style.textContent = `
             .rtp-settings-panel h3 {
@@ -98,6 +97,10 @@ module.exports = class RandomThemeChanger {
             .rtp-settings-panel input[type="range"] {
                 width: 200px;
             }
+            .rtp-settings-panel input[type="number"] {
+                width: 60px;
+                margin-left: 10px;
+            }
             .rtp-theme-toggle, .rtp-toast-toggle {
                 margin-bottom: 5px;
             }
@@ -106,23 +109,42 @@ module.exports = class RandomThemeChanger {
 
         panel.classList.add('rtp-settings-panel');
 
-        
         const sliderContainer = document.createElement("div");
         sliderContainer.innerHTML = `
             <h3>Switch Interval (minutes)</h3>
-            <input type="range" id="switchIntervalSlider" min="1" max="1440" value="${this.settings.switchInterval}">
-            <span id="switchIntervalValue">${this.settings.switchInterval}</span>
+            <input type="range" id="switchIntervalSlider" min="1" max="360" step="1" value="${this.settings.switchInterval}">
+            <input type="number" id="switchIntervalInput" min="1" max="360" value="${this.settings.switchInterval}">
         `;
         panel.appendChild(sliderContainer);
 
         const slider = sliderContainer.querySelector("#switchIntervalSlider");
-        const sliderValue = sliderContainer.querySelector("#switchIntervalValue");
-        slider.addEventListener("input", () => {
-            const value = parseInt(slider.value);
-            sliderValue.textContent = value;
+        const input = sliderContainer.querySelector("#switchIntervalInput");
+
+        const updateInterval = (value) => {
             this.settings.switchInterval = value;
             this.saveSettings();
             this.startInterval();
+        };
+
+        slider.addEventListener("input", () => {
+            let value = parseInt(slider.value);
+            if (value > 5) {
+                value = Math.round(value / 5) * 5;
+            }
+            input.value = value;
+            updateInterval(value);
+        });
+
+        input.addEventListener("change", () => {
+            let value = parseInt(input.value);
+            if (isNaN(value) || value < 1) {
+                value = 1;
+            } else if (value > 360) {
+                value = 360;
+            }
+            slider.value = value;
+            input.value = value;
+            updateInterval(value);
         });
 
         
